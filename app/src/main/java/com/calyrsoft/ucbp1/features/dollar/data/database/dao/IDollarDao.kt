@@ -18,10 +18,8 @@ interface IDollarDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(dollar: DollarEntity)
 
-
     @Query("DELETE FROM dollars")
     suspend fun deleteAll()
-
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertDollars(lists: List<DollarEntity>)

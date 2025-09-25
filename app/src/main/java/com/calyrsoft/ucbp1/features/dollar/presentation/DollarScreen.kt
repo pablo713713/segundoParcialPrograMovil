@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 
+
 @Composable
 fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
     val state by viewModelDollar.uiState.collectAsState()
@@ -27,23 +30,49 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
             .padding(16.dp)
     ) {
 
-        // --- Sección: valor actual (tu lógica original) ---
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            when (val s = state) {
-                is DollarViewModel.DollarUIState.Error -> Text(s.message)
-                DollarViewModel.DollarUIState.Loading -> CircularProgressIndicator()
-                is DollarViewModel.DollarUIState.Success -> {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Dólar oficial: ${s.data.dollarOfficial ?: "-"}",
-                            style = MaterialTheme.typography.titleMedium
+        // --- Sección: valor actual ---
+        when (val s = state) {
+            is DollarViewModel.DollarUIState.Error -> {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(s.message)
+                }
+            }
+            DollarViewModel.DollarUIState.Loading -> {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is DollarViewModel.DollarUIState.Success -> {
+                // Tarjetas 2x2: Oficial, Paralelo, USDT, USDC
+                Text(
+                    text = "Tipos de cambio",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.height(8.dp))
+
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RateCard(
+                            title = "Oficial",
+                            value = s.data.dollarOfficial ?: "-",
+                            modifier = Modifier.weight(1f)
                         )
-                        Text(
-                            text = "Dólar paralelo: ${s.data.dollarParallel ?: "-"}",
-                            style = MaterialTheme.typography.titleMedium
+                        RateCard(
+                            title = "Paralelo",
+                            value = s.data.dollarParallel ?: "-",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RateCard(
+                            title = "USDT",
+                            value = s.data.dollarUsdt ?: "-",
+                            modifier = Modifier.weight(1f)
+                        )
+                        RateCard(
+                            title = "USDC",
+                            value = s.data.dollarUsdc ?: "-",
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -76,10 +105,12 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
                     Column(Modifier.weight(1f)) {
                         Text("Oficial: ${item.dollarOfficial ?: "-"}")
                         Text("Paralelo: ${item.dollarParallel ?: "-"}")
+                        Text("USDT: ${item.dollarUsdt ?: "-"}")
+                        Text("USDC: ${item.dollarUsdc ?: "-"}")
                         Text("Fecha: ${viewModelDollar.formatDate(item.timestamp)}")
                     }
 
-                    // --- Ícono eliminar ---
+                    // Ícono eliminar
                     androidx.compose.material3.IconButton(
                         onClick = { viewModelDollar.deleteDollar(item.id) }
                     ) {
@@ -89,8 +120,31 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
                         )
                     }
                 }
-                androidx.compose.material3.Divider(Modifier.padding(top = 8.dp))
+                Divider(Modifier.padding(top = 8.dp))
             }
         }
     }
 }
+
+@Composable
+private fun RateCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Text(title, style = MaterialTheme.typography.labelMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(value, style = MaterialTheme.typography.titleLarge)
+        }
+    }
+}
+

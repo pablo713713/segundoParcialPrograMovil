@@ -18,17 +18,19 @@ import com.calyrsoft.ucbp1.features.github.presentation.GithubViewModel
 
 import com.calyrsoft.ucbp1.features.movie.data.api.MovieService
 import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieRemoteDataSource
+import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieLocalDataSource
 import com.calyrsoft.ucbp1.features.movie.data.repository.MovieRepository
 import com.calyrsoft.ucbp1.features.movie.domain.repository.IMoviesRepository
 import com.calyrsoft.ucbp1.features.movie.domain.usecase.FetchPopularMoviesUseCase
 import com.calyrsoft.ucbp1.features.movie.presentation.PopularMoviesViewModel
+import com.calyrsoft.ucbp1.features.movie.data.database.dao.IMovieDao
 
 import com.calyrsoft.ucbp1.features.profile.application.ProfileViewModel
 import com.calyrsoft.ucbp1.features.profile.data.repository.ProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.repository.IProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.usecase.GetProfileUseCase
 
-// 👉 BOOK (OpenLibrary)
+// BOOK (OpenLibrary)
 import com.calyrsoft.ucbp1.features.book.data.api.BookService
 import com.calyrsoft.ucbp1.features.book.data.datasource.BookRemoteDataSource
 import com.calyrsoft.ucbp1.features.book.data.repository.BookRepository
@@ -40,7 +42,6 @@ import com.calyrsoft.ucbp1.features.book.data.datasource.BookLocalDataSource
 
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -55,7 +56,7 @@ object NetworkConstants {
     const val RETROFIT_MOVIE = "RetrofitMovie"
     const val MOVIE_BASE_URL = "https://api.themoviedb.org/"
 
-    // 👉 Nuevo: OpenLibrary
+    // OpenLibrary
     const val RETROFIT_BOOK = "RetrofitOpenLibrary"
     const val OPENLIB_BASE_URL = "https://openlibrary.org/"
 }
@@ -89,7 +90,7 @@ val appModule = module {
             .build()
     }
 
-    // 👉 Retrofit OpenLibrary (Books)
+    // Retrofit OpenLibrary (Books)
     single(named(NetworkConstants.RETROFIT_BOOK)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.OPENLIB_BASE_URL)
@@ -112,8 +113,10 @@ val appModule = module {
     factory { GetProfileUseCase(get()) }
     viewModel { ProfileViewModel(get()) }
 
-    // ===== Dollar (Room) =====
+    // ===== Room DB =====
     single { AppRoomDatabase.getDatabase(get()) }
+
+    // Dollar DAOs / DS / Repo / UseCase / VM
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
     single { DollarLocalDataSource(get()) }
@@ -121,17 +124,21 @@ val appModule = module {
     factory { FetchDollarUseCase(get()) }
     viewModel { DollarViewModel(fetchDollarUseCase = get(), localDataSource = get()) }
 
-    // ===== Movie =====
+    // Movie DAOs / DS / Repo / UseCase / VM
+    single<IMovieDao> { get<AppRoomDatabase>().movieDao() }      // DAO
+    single { MovieLocalDataSource(get()) }                       // Local DS
     single(named("apiKey")) { androidApplication().getString(R.string.api_key) }
     single<MovieService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE)).create(MovieService::class.java)
     }
-    single { MovieRemoteDataSource(get(), get(named("apiKey"))) }
-    single<IMoviesRepository> { MovieRepository(get()) }
+    single { MovieRemoteDataSource(get(), get(named("apiKey"))) } // Remote DS
+    single<IMoviesRepository> { MovieRepository(get(), get()) }   // Repo (remote + local)
     factory { FetchPopularMoviesUseCase(get()) }
     viewModel { PopularMoviesViewModel(get()) }
 
-    // ===== Book (OpenLibrary) =====
+    // Book DAOs / DS / Repo / UseCase / VM
+    single<IBookDao> { get<AppRoomDatabase>().bookDao() }
+    single { BookLocalDataSource(get()) }
     single<BookService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_BOOK)).create(BookService::class.java)
     }
@@ -139,7 +146,4 @@ val appModule = module {
     single<IBookRepository> { BookRepository(get()) }
     factory { FindByBookNameUseCase(get()) }
     viewModel { BookViewModel(get(), get(), get()) }
-    single<IBookDao> { get<AppRoomDatabase>().bookDao() }
-    single { BookLocalDataSource(get()) }
-
 }

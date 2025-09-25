@@ -8,6 +8,8 @@ fun DollarEntity.toModel(): DollarModel {
         id = id,
         dollarOfficial = dollarOfficial,
         dollarParallel = dollarParallel,
+        dollarUsdt = dollarUsdt,   // 👈 nuevo
+        dollarUsdc = dollarUsdc,   // 👈 nuevo
         timestamp = timestamp
     )
 }
@@ -15,6 +17,9 @@ fun DollarEntity.toModel(): DollarModel {
 fun DollarModel.toEntity(): DollarEntity {
     return DollarEntity(
         dollarOfficial = dollarOfficial,
-        dollarParallel = dollarParallel
+        dollarParallel = dollarParallel,
+        dollarUsdt = dollarUsdt,   // 👈 nuevo
+        dollarUsdc = dollarUsdc    // 👈 nuevo
+        // timestamp se autogenera en la Entity
     )
 }

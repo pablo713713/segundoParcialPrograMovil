@@ -32,9 +32,7 @@ class DollarViewModel(
         class Success(val data: DollarModel) : DollarUIState()
     }
 
-    init {
-        getDollar()
-    }
+    init { getDollar() }
 
     private val _uiState = MutableStateFlow<DollarUIState>(DollarUIState.Loading)
     val uiState: StateFlow<DollarUIState> = _uiState.asStateFlow()
@@ -42,11 +40,13 @@ class DollarViewModel(
     val history: StateFlow<List<DollarModel>> =
         localDataSource.observeHistory()
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     fun getDollar() {
         viewModelScope.launch(Dispatchers.IO) {
-                    getToken()
-                    fetchDollarUseCase.invoke().collect {
-                        data -> _uiState.value = DollarUIState.Success(data) }
+            getToken()
+            fetchDollarUseCase.invoke().collect { data ->
+                _uiState.value = DollarUIState.Success(data)
+            }
         }
     }
 
@@ -59,7 +59,6 @@ class DollarViewModel(
         localDataSource.deleteById(id)
     }
 
-
     suspend fun getToken(): String = suspendCoroutine { continuation ->
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
@@ -68,11 +67,8 @@ class DollarViewModel(
                     continuation.resumeWithException(task.exception ?: Exception("Unknown error"))
                     return@addOnCompleteListener
                 }
-                // Si la tarea fue exitosa, se obtiene el token
                 val token = task.result
                 Log.d("FIREBASE", "FCM Token: $token")
-
-                // Reanudar la ejecución con el token
                 continuation.resume(token ?: "")
             }
     }

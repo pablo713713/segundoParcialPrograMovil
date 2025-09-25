@@ -12,16 +12,16 @@ class DollarLocalDataSource(
 ) {
 
     suspend fun getList(): List<DollarModel> {
-        return dao.getList().map {
-            it.toModel()
-        }
-
+        return dao.getList().map { it.toModel() }
     }
+
     fun observeHistory(): Flow<List<DollarModel>> =
         dao.observeHistory().map { list -> list.map { it.toModel() } }
+
     suspend fun deleteAll() {
         dao.deleteAll()
     }
+
     suspend fun inserTDollars(list: List<DollarModel>) {
         val dollarEntity = list.map { it.toEntity() }
         dao.insertDollars(dollarEntity)
@@ -32,5 +32,4 @@ class DollarLocalDataSource(
     }
 
     suspend fun deleteById(id: Long) = dao.deleteById(id)
-
 }

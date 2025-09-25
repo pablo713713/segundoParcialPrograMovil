@@ -6,22 +6,29 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.calyrsoft.ucbp1.features.dollar.data.database.dao.IDollarDao
 import com.calyrsoft.ucbp1.features.dollar.data.database.entity.DollarEntity
-// 👉 imports de Book
+
+// Book
 import com.calyrsoft.ucbp1.features.book.data.database.dao.IBookDao
 import com.calyrsoft.ucbp1.features.book.data.database.entity.BookEntity
+
+// Movie 👇
+import com.calyrsoft.ucbp1.features.movie.data.database.dao.IMovieDao
+import com.calyrsoft.ucbp1.features.movie.data.database.entity.MovieEntity
 
 @Database(
     entities = [
         DollarEntity::class,
-        BookEntity::class
+        BookEntity::class,
+        MovieEntity::class,
     ],
-    version = 2,
+    version = 4,
     exportSchema = true
 )
 abstract class AppRoomDatabase : RoomDatabase() {
 
     abstract fun dollarDao(): IDollarDao
-    abstract fun bookDao(): IBookDao // ← nuevo DAO
+    abstract fun bookDao(): IBookDao
+    abstract fun movieDao(): IMovieDao
 
     companion object {
         @Volatile
@@ -32,9 +39,9 @@ abstract class AppRoomDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                     context,
                     AppRoomDatabase::class.java,
-                    "dollar_db" // mantenemos el mismo nombre de BD
+                    "dollar_db"
                 )
-                    .fallbackToDestructiveMigration() // ← evita crashes por cambios de esquema en dev
+                    .fallbackToDestructiveMigration() // en dev evita crashes por cambios de esquema
                     .build()
                     .also { INSTANCE = it }
             }

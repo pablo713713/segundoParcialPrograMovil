@@ -28,11 +28,9 @@ class PopularMoviesViewModel(
             _state.value = UiState.Loading
             val result = fetchPopularMovies.invoke()
             result.fold(
-                onSuccess = {
-                    _state.value = UiState.Success(it)
-                },
-                onFailure = {
-                    _state.value = UiState.Error("error")
+                onSuccess = { _state.value = UiState.Success(it) },
+                onFailure = { e ->
+                    _state.value = UiState.Error(e.message ?: "Error desconocido")
                 }
             )
         }
