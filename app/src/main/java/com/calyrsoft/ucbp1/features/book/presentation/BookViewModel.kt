@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 class BookViewModel(
     private val usecase: FindByBookNameUseCase,
     private val context: Context,
-    // 👇 nuevo: data source local para “me gusta”
     private val local: BookLocalDataSource
 ) : ViewModel() {
 

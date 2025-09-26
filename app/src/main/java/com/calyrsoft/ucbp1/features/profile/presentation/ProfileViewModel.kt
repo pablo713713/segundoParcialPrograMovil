@@ -1,4 +1,4 @@
-package com.calyrsoft.ucbp1.features.profile.application
+package com.calyrsoft.ucbp1.features.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -11,7 +11,7 @@ import com.calyrsoft.ucbp1.features.cardexample.presentation.CardScreen
 import com.calyrsoft.ucbp1.features.dollar.presentation.DollarScreen
 import com.calyrsoft.ucbp1.features.github.presentation.GithubScreen
 import com.calyrsoft.ucbp1.features.movie.presentation.PopularMoviesScreen
-import com.calyrsoft.ucbp1.features.profile.application.ProfileScreen
+import com.calyrsoft.ucbp1.features.profile.presentation.ProfileScreen
 
 @Composable
 fun AppNavigation() {
@@ -19,28 +19,20 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.PopularMovies.route
+        startDestination = Screen.Dollar.route
     ) {
-        composable(Screen.Github.route) {
-            GithubScreen(modifier = Modifier)
-        }
-        composable(Screen.Home.route) {
+        composable(Screen.Github.route) { GithubScreen(modifier = Modifier) }
 
-        }
-        composable(Screen.Profile.route) {
-            ProfileScreen()
-        }
+        composable(Screen.Home.route) { /* ... */ }
+
+        composable(Screen.Profile.route) { ProfileScreen(navController) }
 
         composable(Screen.CardExamples.route) { CardScreen() }
 
-        composable(Screen.Dollar.route) {
-            DollarScreen()
-        }
+        composable(Screen.Dollar.route) { DollarScreen(navController) }            // ← pasa navController
 
-        composable(Screen.Book.route) {
-            BookScreen()
-        }
+        composable(Screen.Book.route) { BookScreen() }
 
-        composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
+        composable(Screen.PopularMovies.route) { PopularMoviesScreen(navController) } // ← pasa navController
     }
 }

@@ -4,23 +4,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.calyrsoft.ucbp1.navigation.Screen
 import org.koin.androidx.compose.koinViewModel
 
-
 @Composable
-fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
+fun DollarScreen(
+    navController: NavController,
+    viewModelDollar: DollarViewModel = koinViewModel()
+) {
     val state by viewModelDollar.uiState.collectAsState()
     val history by viewModelDollar.history.collectAsState()
 
@@ -43,7 +42,6 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
                 }
             }
             is DollarViewModel.DollarUIState.Success -> {
-                // Tarjetas 2x2: Oficial, Paralelo, USDT, USDC
                 Text(
                     text = "Tipos de cambio",
                     style = MaterialTheme.typography.titleMedium
@@ -110,11 +108,8 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
                         Text("Fecha: ${viewModelDollar.formatDate(item.timestamp)}")
                     }
 
-                    // Ícono eliminar
-                    androidx.compose.material3.IconButton(
-                        onClick = { viewModelDollar.deleteDollar(item.id) }
-                    ) {
-                        androidx.compose.material3.Icon(
+                    IconButton(onClick = { viewModelDollar.deleteDollar(item.id) }) {
+                        Icon(
                             imageVector = androidx.compose.material.icons.Icons.Filled.Delete,
                             contentDescription = "Eliminar"
                         )
@@ -122,6 +117,15 @@ fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
                 }
                 Divider(Modifier.padding(top = 8.dp))
             }
+        }
+
+        // --- Botón al final para navegar a Movies ---
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = { navController.navigate(Screen.PopularMovies.route) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ir a Películas")
         }
     }
 }
@@ -147,4 +151,3 @@ private fun RateCard(
         }
     }
 }
-

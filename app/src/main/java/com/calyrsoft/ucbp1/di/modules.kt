@@ -1,7 +1,11 @@
 package com.calyrsoft.ucbp1.di
 
 import com.calyrsoft.ucbp1.R
+
+// DB
 import com.calyrsoft.ucbp1.features.dollar.data.database.AppRoomDatabase
+
+// Dollar
 import com.calyrsoft.ucbp1.features.dollar.data.datasource.DollarLocalDataSource
 import com.calyrsoft.ucbp1.features.dollar.data.datasource.RealTimeRemoteDataSource
 import com.calyrsoft.ucbp1.features.dollar.data.repository.DollarRepository
@@ -9,6 +13,7 @@ import com.calyrsoft.ucbp1.features.dollar.domain.repository.IDollarRepository
 import com.calyrsoft.ucbp1.features.dollar.domain.usecase.FetchDollarUseCase
 import com.calyrsoft.ucbp1.features.dollar.presentation.DollarViewModel
 
+// GitHub
 import com.calyrsoft.ucbp1.features.github.data.api.GithubService
 import com.calyrsoft.ucbp1.features.github.data.datasource.GithubRemoteDataSource
 import com.calyrsoft.ucbp1.features.github.data.repository.GithubRepository
@@ -16,6 +21,7 @@ import com.calyrsoft.ucbp1.features.github.domain.repository.IGithubRepository
 import com.calyrsoft.ucbp1.features.github.domain.usecase.FindByNickNameUseCase
 import com.calyrsoft.ucbp1.features.github.presentation.GithubViewModel
 
+// Movie
 import com.calyrsoft.ucbp1.features.movie.data.api.MovieService
 import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieRemoteDataSource
 import com.calyrsoft.ucbp1.features.movie.data.datasource.MovieLocalDataSource
@@ -25,12 +31,13 @@ import com.calyrsoft.ucbp1.features.movie.domain.usecase.FetchPopularMoviesUseCa
 import com.calyrsoft.ucbp1.features.movie.presentation.PopularMoviesViewModel
 import com.calyrsoft.ucbp1.features.movie.data.database.dao.IMovieDao
 
-import com.calyrsoft.ucbp1.features.profile.application.ProfileViewModel
+// Profile
+import com.calyrsoft.ucbp1.features.profile.presentation.ProfileViewModel
 import com.calyrsoft.ucbp1.features.profile.data.repository.ProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.repository.IProfileRepository
 import com.calyrsoft.ucbp1.features.profile.domain.usecase.GetProfileUseCase
 
-// BOOK (OpenLibrary)
+// Book (OpenLibrary)
 import com.calyrsoft.ucbp1.features.book.data.api.BookService
 import com.calyrsoft.ucbp1.features.book.data.datasource.BookRemoteDataSource
 import com.calyrsoft.ucbp1.features.book.data.repository.BookRepository
@@ -56,14 +63,13 @@ object NetworkConstants {
     const val RETROFIT_MOVIE = "RetrofitMovie"
     const val MOVIE_BASE_URL = "https://api.themoviedb.org/"
 
-    // OpenLibrary
     const val RETROFIT_BOOK = "RetrofitOpenLibrary"
     const val OPENLIB_BASE_URL = "https://openlibrary.org/"
 }
 
 val appModule = module {
 
-    // OkHttpClient
+    // ---------- OkHttp ----------
     single {
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -72,7 +78,7 @@ val appModule = module {
             .build()
     }
 
-    // Retrofit GitHub
+    // ---------- Retrofit ----------
     single(named(NetworkConstants.RETROFIT_GITHUB)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.GITHUB_BASE_URL)
@@ -80,8 +86,6 @@ val appModule = module {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
-    // Retrofit Movie
     single(named(NetworkConstants.RETROFIT_MOVIE)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.MOVIE_BASE_URL)
@@ -89,8 +93,6 @@ val appModule = module {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
-    // Retrofit OpenLibrary (Books)
     single(named(NetworkConstants.RETROFIT_BOOK)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.OPENLIB_BASE_URL)
@@ -99,24 +101,10 @@ val appModule = module {
             .build()
     }
 
-    // ===== GitHub =====
-    single<GithubService> {
-        get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB)).create(GithubService::class.java)
-    }
-    single { GithubRemoteDataSource(get()) }
-    single<IGithubRepository> { GithubRepository(get()) }
-    factory { FindByNickNameUseCase(get()) }
-    viewModel { GithubViewModel(get(), get()) }
-
-    // ===== Profile =====
-    single<IProfileRepository> { ProfileRepository() }
-    factory { GetProfileUseCase(get()) }
-    viewModel { ProfileViewModel(get()) }
-
-    // ===== Room DB =====
+    // ---------- ROOM DB (única instancia) ----------
     single { AppRoomDatabase.getDatabase(get()) }
 
-    // Dollar DAOs / DS / Repo / UseCase / VM
+    // DOLLAR
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
     single { DollarLocalDataSource(get()) }
@@ -124,24 +112,32 @@ val appModule = module {
     factory { FetchDollarUseCase(get()) }
     viewModel { DollarViewModel(fetchDollarUseCase = get(), localDataSource = get()) }
 
-    // Movie DAOs / DS / Repo / UseCase / VM
-    single<IMovieDao> { get<AppRoomDatabase>().movieDao() }      // DAO
-    single { MovieLocalDataSource(get()) }                       // Local DS
+    // MOVIE
+    single<IMovieDao> { get<AppRoomDatabase>().movieDao() }         // DAO
+    single { MovieLocalDataSource(get()) }                          // Local DS
     single(named("apiKey")) { androidApplication().getString(R.string.api_key) }
-    single<MovieService> {
-        get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE)).create(MovieService::class.java)
-    }
-    single { MovieRemoteDataSource(get(), get(named("apiKey"))) } // Remote DS
-    single<IMoviesRepository> { MovieRepository(get(), get()) }   // Repo (remote + local)
+    single<MovieService> { get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE)).create(MovieService::class.java) }
+    single { MovieRemoteDataSource(get(), get(named("apiKey"))) }   // Remote DS
+    single<IMoviesRepository> { MovieRepository(get(), get()) }     // Repo(remote, local)
     factory { FetchPopularMoviesUseCase(get()) }
     viewModel { PopularMoviesViewModel(get()) }
 
-    // Book DAOs / DS / Repo / UseCase / VM
+    // GITHUB
+    single<GithubService> { get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB)).create(GithubService::class.java) }
+    single { GithubRemoteDataSource(get()) }
+    single<IGithubRepository> { GithubRepository(get()) }
+    factory { FindByNickNameUseCase(get()) }
+    viewModel { GithubViewModel(get(), get()) }
+
+    // PROFILE
+    single<IProfileRepository> { ProfileRepository() }
+    factory { GetProfileUseCase(get()) }
+    viewModel { ProfileViewModel(get()) }
+
+    // BOOK (OpenLibrary)
     single<IBookDao> { get<AppRoomDatabase>().bookDao() }
     single { BookLocalDataSource(get()) }
-    single<BookService> {
-        get<Retrofit>(named(NetworkConstants.RETROFIT_BOOK)).create(BookService::class.java)
-    }
+    single<BookService> { get<Retrofit>(named(NetworkConstants.RETROFIT_BOOK)).create(BookService::class.java) }
     single { BookRemoteDataSource(get()) }
     single<IBookRepository> { BookRepository(get()) }
     factory { FindByBookNameUseCase(get()) }

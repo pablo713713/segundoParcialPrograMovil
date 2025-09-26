@@ -1,12 +1,9 @@
-package com.calyrsoft.ucbp1.features.profile.application
+package com.calyrsoft.ucbp1.features.profile.presentation
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,11 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.calyrsoft.ucbp1.navigation.Screen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileScreen(
+    navController: NavController,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val state = profileViewModel.state.collectAsState()
@@ -33,52 +33,50 @@ fun ProfileScreen(
         profileViewModel.showProfile()
     }
 
-    when(val st = state.value) {
+    when (val st = state.value) {
         is ProfileViewModel.ProfileUiState.Error -> Text(st.message)
         ProfileViewModel.ProfileUiState.Init -> Text("")
         ProfileViewModel.ProfileUiState.Loading -> CircularProgressIndicator()
         is ProfileViewModel.ProfileUiState.Success -> {
+            val p = st.profile
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = st.profile.pathUrl,
-                    contentDescription = "Foto de perfil de ${st.profile.name}",
+                    model = p.pathUrl.value,
+                    contentDescription = "Foto de perfil de ${p.name.value}",
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(CircleShape) // Opcional: imagen circular
+                        .clip(CircleShape)
                         .border(2.dp, Color.Gray, CircleShape),
                     contentScale = ContentScale.Crop
                 )
 
+                Spacer(Modifier.height(8.dp))
+                Text(p.name.value, style = MaterialTheme.typography.titleMedium)
+                Text(p.email.value, style = MaterialTheme.typography.bodyMedium)
+                Text(p.cellphone.value, style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = st.profile.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = st.profile.email,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = st.profile.cellphone,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = st.profile.summary,
+                    p.summary.value,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center
                 )
+
+                // Empuja el botón al fondo
+                Spacer(Modifier.weight(1f))
+
+                // Botón: ir a Dollar
+                Button(
+                    onClick = { navController.navigate(Screen.Dollar.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Ir a Dollar")
+                }
             }
         }
     }
-
-
 }
