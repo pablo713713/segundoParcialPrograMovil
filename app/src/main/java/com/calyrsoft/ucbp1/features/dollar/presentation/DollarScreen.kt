@@ -118,15 +118,6 @@ fun DollarScreen(
                 Divider(Modifier.padding(top = 8.dp))
             }
         }
-
-        // --- Botón al final para navegar a Movies ---
-        Spacer(Modifier.height(12.dp))
-        Button(
-            onClick = { navController.navigate(Screen.PopularMovies.route) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Ir a Películas")
-        }
     }
 }
 

@@ -53,12 +53,5 @@ fun PopularMoviesScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        // Botón al final para ir a Profile
-        Button(
-            onClick = { navController.navigate(Screen.Profile.route) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Ir a Perfil")
-        }
     }
 }

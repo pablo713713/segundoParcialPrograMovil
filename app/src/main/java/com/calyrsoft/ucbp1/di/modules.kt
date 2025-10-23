@@ -142,4 +142,5 @@ val appModule = module {
     single<IBookRepository> { BookRepository(get()) }
     factory { FindByBookNameUseCase(get()) }
     viewModel { BookViewModel(get(), get(), get()) }
+
 }

@@ -66,16 +66,7 @@ fun ProfileScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Empuja el botón al fondo
-                Spacer(Modifier.weight(1f))
 
-                // Botón: ir a Dollar
-                Button(
-                    onClick = { navController.navigate(Screen.Dollar.route) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Ir a Dollar")
-                }
             }
         }
     }

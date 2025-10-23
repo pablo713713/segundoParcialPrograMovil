@@ -7,7 +7,6 @@ sealed class Screen(val route: String) {
 
     object CardExamples: Screen("card")
     object Dollar: Screen("dollar")
-
-    object Book: Screen("book")
     object PopularMovies: Screen("popularMovies")
+    object Book: Screen("book")
 }
